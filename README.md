@@ -1,5 +1,5 @@
-Sumorobot UI
-==========
+sumorobot-uI
+============
 This is the web application that is served from the Sumorobot Wi-Fi module allowing it to be controlled.
 
 Developing
