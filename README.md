@@ -2,7 +2,7 @@ sumorobot-ui
 ============
 This is the web application that is served from the Sumorobot Wi-Fi module allowing it to be controlled.
 
-Developing
+developing
 ==========
 To do any development, first you'll need to install the dependencies. If you're not used to using Ruby and bundler,  assuming you already have Ruby installed, the process is to first install the bundler gem using:
 ```
@@ -17,7 +17,7 @@ You can now run the test server which has a dummy websocket that emulates the Su
 ./bin/test_server.rb
 ```
 
-Buiding the binary
+buiding the binary
 ==================
 To build your own bin file you can run:
 ```
@@ -25,7 +25,7 @@ rake dist
 ```
 to generate the bin file in the dist folder.
 
-Uploading the binary
+uploading the binary
 ====================
 Join the sumorobot network and load the UI by visiting http://10.10.100.254/
 
