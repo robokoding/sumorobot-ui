@@ -6,7 +6,7 @@ developing
 ==========
 To do any development, first you'll need to install the dependencies. If you're not used to using Ruby and bundler,  assuming you already have Ruby installed, the process is to first install the bundler gem using:
 ```bash
-gem install bundler
+sudo gem install bundler
 ```
 if you're on a unix based system you might need to use sudo. Then install all of the gems using:
 ```bash
