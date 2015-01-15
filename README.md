@@ -8,7 +8,7 @@ To do any development, first you'll need to install the dependencies. If you're 
 ```bash
 sudo gem install bundler
 ```
-if you're on a unix based system you might need to use sudo. Then install all of the gems using:
+Then install all of the gems using:
 ```bash
 bundle install
 ```
