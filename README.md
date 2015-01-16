@@ -1,5 +1,8 @@
 sumorobot-ui
 ============
+
+<img src="https://lh5.googleusercontent.com/-sUXr6EHq-bk/VLcbPKvVNnI/AAAAAAAAKD8/4c2hurMEaCI/w1229-h832-no/onboard.png" alt="onboard" width="50%">
+
 This is the web application that is served from the Sumorobot Wi-Fi module allowing it to be controlled.
 
 developing
