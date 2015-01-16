@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 require 'zlib'
 require 'nokogiri'
 require 'uglifier'
@@ -13,6 +15,10 @@ $ugly_options = {
 $input_dir = 'src'
 $output_dir = 'out'
 $dist_dir = 'dist'
+
+def add_timestamp(input)
+  return input.gsub('{{timestamp}}', Time.now.strftime('%Y%m%d%H%M'))
+end
 
 def squish_file(input, options = {})
   # Don't squish site survey because this removes the tag we want
@@ -71,10 +77,6 @@ end
 task :dist do
   Rake::Task["flatten"].execute
   Rake::Task["create_bin"].execute
-end
-
-def add_timestamp(input)
-  return input.gsub('{{timestamp}}', Time.now.strftime('%Y%m%d%H%M'))
 end
 
 task :build do
