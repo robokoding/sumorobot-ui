@@ -24,11 +24,15 @@ var removeIfField = function() {
 };
 
 FnInstance.prototype = {
-  run: function(children){
+  run: function(cb){
     var self = this;
     if(self.fn){
       // This is a function
-      self.fn.run(self, self.sumorobot, function(state){ self.updateState(state)});
+      if(typeof(cb) !== 'undefined'){
+        self.fn.run(self, self.sumorobot, cb);
+      }else{
+        self.fn.run(self, self.sumorobot, function(state, msg){ self.updateState(state)});
+      }
     }else{
       // This is the root container
       for(var i in self.children){
@@ -37,10 +41,8 @@ FnInstance.prototype = {
     }
   },
   updateState: function(state){
-    if(state === 'started'){
-      $(this.el).addClass('active');
-    }else if(state === 'complete'){
-      $(this.el).removeClass('active');
+    if(state === 'complete'){
+      //$(this.el).removeClass('active');
     }
     if(this.parent && this.parent.el){
       this.parent.updateState(state);
@@ -198,8 +200,9 @@ Builder.prototype = {
   },
   sumorobotHandler: function(state){
     if(state === 'program_complete'){
-      this.runner.show();
-      this.pause.hide();
+      //this.runner.show();
+      //this.pause.hide();
+      this.runProgram();
     }
   },
   showHints: function(){
@@ -248,8 +251,7 @@ Builder.prototype = {
             if(f.content[i].name === 'if'){
               fn += '<div style="clear:both;"><div class="if-left"><span>' + f.content[i].label1 + '</span>';
               fn += '<ol name="if"><li class="end if"><div class="hint">Drag Enemy or Line here!</div></li></li></ol></div>';
-              fn += '<div class="if-right"><span>' + f.content[i].label2 + '</span>';
-              fn += '<ol name="if_do"><li class="end func"><div class="hint">Drag functions into here!</div></li></li></ol></div></div>';
+              fn += '<div class="if-right"><span>' + f.content[i].label2 + '';
             }else if (f.content[i].name.indexOf('else_if') > -1){
               // magic name formula xD
               var id = parseInt(f.content[i].name.split('else_if')[1]);
@@ -267,6 +269,8 @@ Builder.prototype = {
             }
           }else if(f.content[i].input === 'button'){
             fn += '<input type="button" value="' + f.content[i].value + '" name="' + f.content[i].name + '" onclick="' + f.content[i].onclick + '"></input>';
+          }else if(f.content[i].input === 'hax'){
+            fn += '</span><ol name="if_do"><li class="end func"><div class="hint">Drag functions into here!</div></li></li></ol></div></div>';
           }
         }
       }
@@ -288,7 +292,6 @@ Builder.prototype = {
     });
   },
   runProgram: function(){
-    //if(this.following || this.colliding){ return; }
     if(this.paused){
       this.sumorobot.resume();
     }else{
@@ -303,7 +306,7 @@ Builder.prototype = {
   pauseProgram: function(){
     var self = this;
     this.paused = true;
-    this.sumorobt.pause(function(){
+    this.sumorobot.pause(function(){
       self.runner.show();
       self.pause.hide();
     });
@@ -335,13 +338,13 @@ Builder.prototype = {
         if(fn.name === 'if'){
           self.generate(el.querySelectorAll("ol[name=if]")[0], inst);
           self.generate(el.querySelectorAll("ol[name=if_do]")[0], inst);
-          self.generate(el.querySelectorAll("ol[name=else]")[0], inst);
           var elems = el.querySelectorAll('.visible ol');
           for(var i = 0; i< elems.length; i++){
             if(elems[i].nodeName.toLowerCase() === 'ol'){
               self.generate(elems[i], inst);
             }
           }
+          self.generate(el.querySelectorAll("ol[name=else]")[0], inst);
         }else if(fn.type === 'parent'){
           var children = el.childNodes;
           for(var i = 0; i< children.length; i++){
@@ -359,21 +362,58 @@ Builder.prototype = {
       type:'parent',
       content:[
         {input:'if_child', name:'if', label1:'When', label2:'Do', class:'visible'},
+        {input:'button', name:'remove', value:'&#9650;', onclick:'removeIfField();'},
+        {input:'button', name:'add', value:'&#9660;', onclick:'addIfField();'},
+        {input:'hax', name:'add'},
         {input:'if_child', name:'else_if0', label1:'When', label2:'Do', class:'hidden'},
         {input:'if_child', name:'else_if1', label1:'When', label2:'Do', class:'hidden'},
         {input:'if_child', name:'else_if2', label1:'When', label2:'Do', class:'hidden'},
         {input:'if_child', name:'else_if3', label1:'When', label2:'Do', class:'hidden'},
         {input:'if_child', name:'else_if4', label1:'When', label2:'Do', class:'hidden'},
-        {input:'if_child', name:'else', label:'Else Do', class:'visible'},
-        {input:'button', name:'remove', value:'&#9650;', onclick:'removeIfField();'},
-        {input:'button', name:'add', value:'&#9660;', onclick:'addIfField();'}
+        {input:'if_child', name:'else', label:'Else Do', class:'visible'}
       ],
       run: function(node, sumorobot, cb){
-        //console.log(node.children);
+        var children = [];
+        var current = null;
+        var else_index = 0;
+        // see which if clause children to execute
         for(var j=0; j< node.children.length; j++){
-          alert(node.children[j].name);
-          //node.children[j].run();
+          if(node.children[j].belongs === 'if'){
+            node.children[j].index = j+1;
+            children.push(node.children[j]);
+          }else if(node.children[j].belongs.match(/[02468]/)){
+            node.children[j].index = j+1;
+            children.push(node.children[j]);
+          }else if(node.children[j].belongs === 'else'){
+            else_index = j;
+            break;
+          }
         }
+        children.reverse();
+        var execute_children = function(index){
+          var belongs = node.children[index].belongs;
+          for(var i=index; i< node.children.length; i++){
+            if(node.children[i].belongs === belongs) node.children[i].run();
+            else return;
+          }
+        };
+        var callback = function(state, msg){
+          if(msg && msg.msg === 'true'){
+            console.log("true: " + msg);
+            execute_children(current.index)
+            return;
+          }
+          console.log("false: " + msg);
+          //$(current.el).removeClass('active');
+          // execute the child
+          if(children.length > 0){
+            current = children.pop();
+            current.run(callback);
+          } else {
+            execute_children(else_index);
+          }
+        };
+        callback('', {msg:'false'});
       }
     },
     {
@@ -397,9 +437,10 @@ Builder.prototype = {
       type:'child',
       content:[
         'Move',
-        {input:'option', name:'direction', default:'forward', values:['forward&#8593;', 'backward&#8595;', 'left&#8634;', 'right&#8635;']}
+        {input:'option', name:'direction', default:'forward', values:['forward', 'backward', 'left', 'right', 'stop']}
       ],
       run: function(node, sumorobot, cb){
+        //$(node.el).addClass('active');
         sumorobot.move(node.args().direction, node.args().distance, cb);
       }
     },
@@ -411,7 +452,8 @@ Builder.prototype = {
         {input:'option', name:'direction', default:'left', values:['left', 'right', 'front']}
       ],
       run: function(node, sumorobot, cb){
-        sumorobot.turn(node.args().direction, node.args().angle, cb);
+        //$(node.el).addClass('active');
+        sumorobot.isSensor('enemy', node.args().direction, cb);
       }
     },
     {
@@ -422,7 +464,8 @@ Builder.prototype = {
         {input:'option', name:'direction', default:'left', values:['left', 'right', 'front']}
       ],
       run: function(node, sumorobot, cb){
-        sumorobot.turn(node.args().direction, node.args().angle, cb);
+        //$(node.el).addClass('active');
+        sumorobot.isSensor('line', node.args().direction, cb);
       }
     }
   ]

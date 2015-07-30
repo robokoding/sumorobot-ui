@@ -10,7 +10,7 @@ Sumorobot.prototype = {
   connected: false,
 
   connect: function(){
-    if(this.connected){
+    if(!this.connected){
       var self = this;
       this.ws = new WebSocket(this.url);
       this.ws.onmessage = function(ws_msg){self.handle_ws(ws_msg)};
@@ -60,32 +60,16 @@ Sumorobot.prototype = {
     }
   },
 
+  isSensor: function(sensor, direction, cb){
+    this.send({cmd: sensor, arg: direction}, cb);
+  },
+
   move: function(direction, distance, cb){
     this.send({cmd: direction, arg: distance}, cb);
   },
 
-  turn: function(direction, angle, cb){
-    this.send({cmd: direction, arg: angle}, cb);
-  },
-
-  penup: function(cb){
-    this.send({cmd: 'penup'}, cb);
-  },
-
-  pendown: function(cb){
-    this.send({cmd: 'pendown'}, cb);
-  },
-
   beep: function(duration, cb){
     this.send({cmd: 'beep', arg: duration}, cb);
-  },
-
-  collide: function(cb){
-    this.send({cmd: 'collide'}, cb);
-  },
-
-  follow: function(cb){
-    this.send({cmd: 'follow'}, cb);
   },
 
   stop: function(cb){
@@ -103,14 +87,6 @@ Sumorobot.prototype = {
     });
   },
   
-  pause: function(cb){
-    this.send({cmd:'pause'}, cb);
-  },
-  
-  resume: function(cb){
-    this.send({cmd:'resume'}, cb);
-  },
-  
   ping: function(cb){
     this.send({cmd:'ping'}, cb);
   },
@@ -125,7 +101,7 @@ Sumorobot.prototype = {
       this.cbs[msg.id] = cb;
     }
     if(msg.arg){ msg.arg = msg.arg.toString(); }
-    if(['stop', 'pause', 'resume', 'ping', 'version'].indexOf(msg.cmd) >= 0){
+    if(['stop', 'ping', 'version'].indexOf(msg.cmd) >= 0){
       console.log(msg);
       this.ws.send(JSON.stringify(msg));
     }else{

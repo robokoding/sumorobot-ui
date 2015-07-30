@@ -58,10 +58,12 @@
       padding-top:0px;
     }
     .functionList input[type='button'] {
-      margin-top: 30px;
+      height:27px;
+      float:right;
     }
     .program input[type='button'] {
-      margin-top: 60px;
+      height:27px;
+      float:right;
     }
     ol > li > span, ol > li > div.hint,
     .editor div > span, div[name='hidden'] span{
@@ -204,13 +206,28 @@
       min-height:1.5em;
       border:1px solid #888;
     }
-    .editor .fn-move{
+    .program .fn-move{
+      /*opacity: 0.75;*/
       background-color:rgb(188, 0, 0);
     }
-    .editor .fn-enemy{
+    .program .fn-enemy{
+      /*opacity: 0.75;*/
       background-color:rgb(0, 125, 188);
     }
-    .editor .fn-line{
+    .program .fn-line{
+      /*opacity: 0.75;*/
+      background-color:rgb(204,204,0);
+    }
+    .functionList .fn-move{
+      opacity: 1.0;
+      background-color:rgb(188, 0, 0);
+    }
+    .functionList .fn-enemy{
+      opacity: 1.0;
+      background-color:rgb(0, 125, 188);
+    }
+    .functionList .fn-line{
+      opacity: 1.0;
       background-color:rgb(204,204,0);
     }
     .editor .dragged {
@@ -226,7 +243,7 @@
       min-height:1.5em;
     }
     .editor ol.program li.function.active{
-      background-color:#0F0;
+      opacity: 1.0;
     }
     body.dragging, body.dragging * {
       cursor: move !important;
@@ -346,7 +363,7 @@
     <div class="content" id="upgradeUIContent">
       <h3>Upgrade the Sumorobot UI</h3>
       <p>First download the latest file to your hard drive:</p>
-      <button onclick="downloadLatestUIVersion();return false">Download latest version</button>
+      <button id="download-latest">Download latest version</button>
       <p>Then select it here:</p>
       <form name= "form_sw_upload" method="post" action="data_success.html" enctype="multipart/form-data">
         <input type="hidden" name="CMD" value="WEB_UPLOAD">
@@ -401,7 +418,7 @@ CONFIG_VAR(wifi_mode, CFG_WMODE);
     wan_setting_dns: wan_setting_dns,
     cover_sta_rssi: cover_sta_rssi,
     cover_ver: cover_ver,
-    wifi_mode: wifi_mode
+    wifi_mode: wifi_mode,
   }
 }();
  
@@ -412,13 +429,11 @@ CONFIG_VAR(wifi_mode, CFG_WMODE);
   <script type="text/javascript" src="snack.sortableList.js"></script>
   <script type="text/javascript">
     var $;
-    var has_remote_conn = true;
-    var remote_base = 'http://www.codesnail.com/assets/sumorobot_js/';
-    var ui_version = '{{timestamp}}';
     var hashConfig = {};
-    if(ui_version === ('{{time' + 'stamp}}')){
-      ui_version = '20140723'; //for testing
-    }
+    var ui_version = 0.01;
+    var has_remote_conn = true;
+    var build_on = '{{timestamp}}';var g='{{time' + 'stamp}}';
+    var remote_base = 'http://www.codesnail.com/javascripts/';
     
     if(window.location.hash !== ''){
       window.location.hash.replace('#', '').split('&').map(function(el){
@@ -426,7 +441,7 @@ CONFIG_VAR(wifi_mode, CFG_WMODE);
         hashConfig[split[0]] = split[1];
       });
     }
-    
+
     var LoadScripts = function (_scripts, base_url, done) {
         var scripts = [];
         var x = 0;
@@ -611,13 +626,14 @@ CONFIG_VAR(wifi_mode, CFG_WMODE);
       initProgram();
       updateWirelessConfig(wirelessConfig);
       el('wifiConnState').onclick = configureWifi;
+      el('download-latest').onclick = downloadLatestUIVersion
       setVersions();
 
-      if(hashConfig['l'] === 'true'){
+      if(hashConfig['l'] !== 'true'){
         // Useful in the future for adding functionality without upgrades
-        loadScript('remote.js', undefined, remote_base, function(){
+        loadScript('robokoding.js', undefined, remote_base, function(){
           has_remote_conn = true;
-          checkUIVersion()
+          checkUIVersion();
         });
       }
     }
